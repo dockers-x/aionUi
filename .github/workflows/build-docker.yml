@@ -60,19 +60,25 @@ jobs:
           fi
 
       # ── 3. Verify both arch release assets exist before building ─────────────
+      # Use the GitHub API to list release assets instead of HEAD requests,
+      # because direct asset URLs redirect to S3 and reject Authorization headers.
       - name: Verify release assets exist
         if: steps.check.outputs.skip != 'true'
         run: |
           VERSION="${{ steps.upstream.outputs.version }}"
-          for ARCH in x86_64 aarch64; do
-            URL="https://github.com/${{ env.UPSTREAM_REPO }}/releases/download/v${VERSION}/aionui-web-${VERSION}-linux-${ARCH}.tar.gz"
-            STATUS=$(curl -fsSL -o /dev/null -w "%{http_code}" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              --head "$URL")
-            if [ "$STATUS" != "302" ] && [ "$STATUS" != "200" ]; then
-              echo "Asset not found: ${URL} (HTTP ${STATUS})" && exit 1
+          ASSETS=$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ env.UPSTREAM_REPO }}/releases/tags/v${VERSION}" \
+            | jq -r '.assets[].name')
+
+          for ARCH in x86_64 arm64; do
+            FILENAME="aionui-web-${VERSION}-linux-${ARCH}.tar.gz"
+            if echo "$ASSETS" | grep -q "^${FILENAME}$"; then
+              echo "Found: ${FILENAME}"
+            else
+              echo "Asset not found in release v${VERSION}: ${FILENAME}" && exit 1
             fi
-            echo "Found: ${URL}"
           done
 
       # ── 4. Checkout repo (needs Dockerfile) ──────────────────────────────────
