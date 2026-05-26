@@ -14,7 +14,7 @@ on:
         default: ""
 
 env:
-  IMAGE_NAME: aionui-web
+  IMAGE_NAME: aionui
   UPSTREAM_REPO: iOfficeAI/AionUi
 
 jobs:

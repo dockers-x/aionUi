@@ -1,0 +1,16 @@
+services:
+  aionui-web:
+    image: czyt/aionui:latest
+    # To build instead of using a pre-built image, replace the line above with:
+    # build: .
+    container_name: aionui
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
+    environment:
+      - AIONUI_PORT=3000
+      - AIONUI_ALLOW_REMOTE=true
+      - AIONUI_DATA_DIR=/data
+      - AIONUI_LOG_DIR=/data/logs

@@ -1,0 +1,20 @@
+# Release tarballs — downloaded at build time inside the container, not needed in build context
+*.tar.gz
+*.zip
+
+# Data directory — never include persistent runtime data in the image
+data/
+
+# Git
+.git/
+.gitignore
+
+# GitHub Actions
+.github/
+
+# Docker files themselves
+docker-compose.yml
+.dockerignore
+
+# Docs
+README.md
